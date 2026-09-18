@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from 'electron';
+import { autoUpdater } from 'electron-updater';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -11,6 +12,16 @@ const __dirname = path.dirname(__filename);
 let mainWindow;
 let server;
 let db;
+
+function checkForUpdates() {
+
+    if (!app.isPackaged) {
+        console.log('Auto update disabled in development');
+        return;
+    }
+
+    autoUpdater.checkForUpdatesAndNotify();
+}
 
 function createWindow() {
 
@@ -152,6 +163,8 @@ server.listen(
     () => {
         console.log('Server running at http://127.0.0.1:3000');
         createWindow();
+        // Check for updates
+        checkForUpdates();
     }
 );
 
