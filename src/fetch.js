@@ -389,7 +389,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </td>
 
                     <td style="font-weight: 700;">
-                        $${client.amount || 0}
+                        ${client.amount || 0} MAD
                     </td>
 
                     <td>
