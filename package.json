@@ -12,12 +12,12 @@
 
   "dependencies": {
     "better-sqlite3": "^13.0.3",
-    "electron": "^44.3.0",
     "electron-updater": "^6.7.0",
     "express": "^5.2.1"
   },
 
   "devDependencies": {
+    "electron": "^44.3.0",
     "electron-builder": "^26.15.3"
   },
 

@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from 'electron';
 import agk from 'electron-updater';
-const { autoUpdater } = agk
+const { autoUpdater } = agk;
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -47,7 +47,7 @@ function createWindow() {
     });
 
     mainWindow.loadURL(
-        'http://127.0.0.1:3000'
+        'http://127.0.0.1:4500'
     );
 
     mainWindow.webContents.on(
@@ -159,10 +159,10 @@ app.whenReady().then(() => {
 server = createServer(db);
 
 server.listen(
-    3000,
+    4500,
     '127.0.0.1',
     () => {
-        console.log('Server running at http://127.0.0.1:3000');
+        console.log('Server running at http://127.0.0.1:4500');
         createWindow();
         // Check for updates
         checkForUpdates();
