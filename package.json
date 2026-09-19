@@ -1,6 +1,6 @@
 {
   "name": "gym_admin",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Gym membership management application",
   "type": "module",
   "main": "main.js",
