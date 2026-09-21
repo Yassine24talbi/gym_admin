@@ -1,6 +1,5 @@
 import { app, BrowserWindow } from 'electron';
-import agk from 'electron-updater';
-const { autoUpdater } = agk;
+import { autoUpdater } from 'electron-updater';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -14,56 +13,101 @@ let mainWindow;
 let server;
 let db;
 
+
+// ==========================================
+// AUTO UPDATE SETTINGS
+// ==========================================
+
+autoUpdater.autoDownload = true;
+autoUpdater.autoInstallOnAppQuit = true;
+
+
+// ==========================================
+// UPDATE EVENTS
+// ==========================================
+
+autoUpdater.on('checking-for-update', () => {
+    console.log('Checking for updates...');
+});
+
+autoUpdater.on('update-available', (info) => {
+    console.log('UPDATE AVAILABLE');
+    console.log('New version:', info.version);
+    console.log('Current version:', app.getVersion());
+});
+
+autoUpdater.on('update-not-available', (info) => {
+    console.log('NO UPDATE AVAILABLE');
+    console.log('Current version:', info.version);
+});
+
+autoUpdater.on('download-progress', (progress) => {
+    console.log(
+        `Downloading update: ${progress.percent.toFixed(1)}%`
+    );
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+    console.log('UPDATE DOWNLOADED');
+    console.log('Version:', info.version);
+
+    console.log('Update will be installed when the app quits.');
+});
+
+autoUpdater.on('error', (error) => {
+    console.error('AUTO UPDATE ERROR:');
+    console.error(error);
+});
+
+
+// ==========================================
+// CHECK FOR UPDATES
+// ==========================================
+
 function checkForUpdates() {
+
     if (!app.isPackaged) {
-        console.log('Auto update disabled in development');
+
+        console.log(
+            'Auto update disabled in development mode.'
+        );
+
         return;
     }
 
-    console.log('Checking for updates...');
+    console.log(
+        'Current application version:',
+        app.getVersion()
+    );
 
-    autoUpdater.on('checking-for-update', () => {
-        console.log('CHECKING FOR UPDATE');
-    });
-
-    autoUpdater.on('update-available', (info) => {
-        console.log('UPDATE AVAILABLE:', info.version);
-    });
-
-    autoUpdater.on('update-not-available', (info) => {
-        console.log('NO UPDATE AVAILABLE:', info.version);
-    });
-
-    autoUpdater.on('download-progress', (progress) => {
-        console.log(`DOWNLOAD: ${progress.percent.toFixed(1)}%`);
-    });
-
-    autoUpdater.on('update-downloaded', (info) => {
-        console.log('UPDATE DOWNLOADED:', info.version);
-    });
-
-    autoUpdater.on('error', (error) => {
-        console.error('UPDATE ERROR:', error);
-    });
+    console.log('Starting update check...');
 
     autoUpdater.checkForUpdates();
 }
+
+
+// ==========================================
+// CREATE WINDOW
+// ==========================================
 
 function createWindow() {
 
     mainWindow = new BrowserWindow({
 
-        width: 1280,
-        height: 800,
+        width: 1080,
+        height: 700,
 
-        minWidth: 900,
-        minHeight: 600,
+        minWidth: 800,
+        minHeight: 550,
 
         fullscreen: true,
 
-        icon: path.join(__dirname, 'icon.ico'),
+        icon: path.join(
+            __dirname,
+            'icon.ico'
+        ),
 
-        title: 'Gym Admin Studio',
+        title: 'Gym Admin',
 
         webPreferences: {
             nodeIntegration: true,
@@ -71,10 +115,13 @@ function createWindow() {
         }
     });
 
+
     mainWindow.loadURL(
         'http://127.0.0.1:4500'
     );
 
+
+    // Escape = exit fullscreen
     mainWindow.webContents.on(
         'before-input-event',
         (event, input) => {
@@ -98,6 +145,7 @@ function createWindow() {
         }
     );
 
+
     mainWindow.on('closed', () => {
 
         mainWindow = null;
@@ -106,24 +154,35 @@ function createWindow() {
 }
 
 
+// ==========================================
+// APP READY
+// ==========================================
+
 app.whenReady().then(() => {
 
     console.log('==============================');
     console.log('Starting Gym Admin');
+    console.log('Version:', app.getVersion());
+    console.log('Packaged:', app.isPackaged);
     console.log('==============================');
 
 
+    // ======================================
     // DATABASE
+    // ======================================
 
     const databasePath = app.isPackaged
+
         ? path.join(
             app.getPath('userData'),
             'database.db'
         )
+
         : path.join(
             __dirname,
             'database.db'
         );
+
 
     console.log(
         'Database:',
@@ -131,11 +190,11 @@ app.whenReady().then(() => {
     );
 
 
-    // CREATE DATABASE
-
     try {
 
-        db = createDatabase(databasePath);
+        db = createDatabase(
+            databasePath
+        );
 
         console.log(
             'SQLite database ready'
@@ -154,7 +213,9 @@ app.whenReady().then(() => {
     }
 
 
-    // CREATE EXPRESS
+    // ======================================
+    // EXPRESS SERVER
+    // ======================================
 
     try {
 
@@ -171,7 +232,9 @@ app.whenReady().then(() => {
             error
         );
 
-        db.close();
+        if (db) {
+            db.close();
+        }
 
         app.quit();
 
@@ -179,60 +242,106 @@ app.whenReady().then(() => {
     }
 
 
-    // START EXPRESS
+    // ======================================
+    // START SERVER
+    // ======================================
 
-server = createServer(db);
+    server.listen(
+        4500,
+        '127.0.0.1',
+        () => {
 
-server.listen(
-    4500,
-    '127.0.0.1',
-    () => {
-        console.log('Server running at http://127.0.0.1:4500');
-        createWindow();
-        // Check for updates
-        checkForUpdates();
+            console.log(
+                'Server running at http://127.0.0.1:4500'
+            );
+
+
+            // Create Electron window
+            createWindow();
+
+
+            // Check GitHub for updates
+            checkForUpdates();
+
+        }
+    );
+
+
+    // ======================================
+    // WINDOW CLOSED
+    // ======================================
+
+    app.on(
+        'window-all-closed',
+        () => {
+
+            if (server) {
+
+                server.close();
+
+                server = null;
+            }
+
+
+            if (db) {
+
+                db.close();
+
+                db = null;
+            }
+
+
+            if (process.platform !== 'darwin') {
+
+                app.quit();
+
+            }
+
+        }
+    );
+
+
+    // ======================================
+    // BEFORE QUIT
+    // ======================================
+
+    app.on(
+        'before-quit',
+        () => {
+
+            if (server) {
+
+                server.close();
+
+                server = null;
+            }
+
+
+            if (db) {
+
+                db.close();
+
+                db = null;
+            }
+
+        }
+    );
+
+});
+
+
+// ==========================================
+// GLOBAL ERROR HANDLER
+// ==========================================
+
+process.on(
+    'uncaughtException',
+    (error) => {
+
+        console.error(
+            'UNCAUGHT EXCEPTION:',
+            error
+        );
+
     }
 );
-
-
-app.on('window-all-closed', () => {
-
-    if (server) {
-
-        server = null;
-    }
-
-    if (db) {
-
-        db.close();
-
-        db = null;
-    }
-
-    if (process.platform !== 'darwin') {
-
-        app.quit();
-
-    }
-
-});
-
-
-app.on('before-quit', () => {
-
-    if (server) {
-
-        server.close();
-
-        server = null;
-    }
-
-    if (db) {
-
-        db.close();
-
-        db = null;
-    }
-
-});
-});

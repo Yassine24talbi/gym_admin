@@ -1,6 +1,6 @@
 {
   "name": "gym_admin",
-  "version": "1.1.1",
+  "version": "1.2.1",
   "description": "Gym membership management application",
   "type": "module",
   "main": "main.js",
@@ -26,7 +26,7 @@
     "productName": "Gym Admin",
 
     "directories": {
-      "output": "dist"
+      "output": "App"
     },
 
     "files": [
