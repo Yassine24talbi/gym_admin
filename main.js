@@ -15,13 +15,38 @@ let server;
 let db;
 
 function checkForUpdates() {
-
     if (!app.isPackaged) {
         console.log('Auto update disabled in development');
         return;
     }
 
-    autoUpdater.checkForUpdatesAndNotify();
+    console.log('Checking for updates...');
+
+    autoUpdater.on('checking-for-update', () => {
+        console.log('CHECKING FOR UPDATE');
+    });
+
+    autoUpdater.on('update-available', (info) => {
+        console.log('UPDATE AVAILABLE:', info.version);
+    });
+
+    autoUpdater.on('update-not-available', (info) => {
+        console.log('NO UPDATE AVAILABLE:', info.version);
+    });
+
+    autoUpdater.on('download-progress', (progress) => {
+        console.log(`DOWNLOAD: ${progress.percent.toFixed(1)}%`);
+    });
+
+    autoUpdater.on('update-downloaded', (info) => {
+        console.log('UPDATE DOWNLOADED:', info.version);
+    });
+
+    autoUpdater.on('error', (error) => {
+        console.error('UPDATE ERROR:', error);
+    });
+
+    autoUpdater.checkForUpdates();
 }
 
 function createWindow() {
