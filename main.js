@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron';
-import { autoUpdater } from 'electron-updater';
+import agk from 'electron-updater';
+const { autoUpdater } = agk
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -276,8 +277,6 @@ app.whenReady().then(() => {
         () => {
 
             if (server) {
-
-                server.close();
 
                 server = null;
             }
