@@ -22,71 +22,6 @@ let db;
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
 
-
-// ==========================================
-// UPDATE EVENTS
-// ==========================================
-
-autoUpdater.on('checking-for-update', () => {
-    console.log('Checking for updates...');
-});
-
-autoUpdater.on('update-available', (info) => {
-    console.log('UPDATE AVAILABLE');
-    console.log('New version:', info.version);
-    console.log('Current version:', app.getVersion());
-});
-
-autoUpdater.on('update-not-available', (info) => {
-    console.log('NO UPDATE AVAILABLE');
-    console.log('Current version:', info.version);
-});
-
-autoUpdater.on('download-progress', (progress) => {
-    console.log(
-        `Downloading update: ${progress.percent.toFixed(1)}%`
-    );
-});
-
-autoUpdater.on('update-downloaded', (info) => {
-    console.log('UPDATE DOWNLOADED');
-    console.log('Version:', info.version);
-
-    console.log('Update will be installed when the app quits.');
-});
-
-autoUpdater.on('error', (error) => {
-    console.error('AUTO UPDATE ERROR:');
-    console.error(error);
-});
-
-
-// ==========================================
-// CHECK FOR UPDATES
-// ==========================================
-
-function checkForUpdates() {
-
-    if (!app.isPackaged) {
-
-        console.log(
-            'Auto update disabled in development mode.'
-        );
-
-        return;
-    }
-
-    console.log(
-        'Current application version:',
-        app.getVersion()
-    );
-
-    console.log('Starting update check...');
-
-    autoUpdater.checkForUpdates();
-}
-
-
 // ==========================================
 // CREATE WINDOW
 // ==========================================
@@ -164,7 +99,6 @@ app.whenReady().then(() => {
     console.log('==============================');
     console.log('Starting Gym Admin');
     console.log('Version:', app.getVersion());
-    console.log('Packaged:', app.isPackaged);
     console.log('==============================');
 
 
@@ -256,14 +190,11 @@ app.whenReady().then(() => {
                 'Server running at http://127.0.0.1:4500'
             );
 
-
             // Create Electron window
             createWindow();
 
-
             // Check GitHub for updates
-            checkForUpdates();
-
+            autoUpdater.checkForUpdates();
         }
     );
 
