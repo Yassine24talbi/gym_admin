@@ -1,6 +1,7 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, dialog } from 'electron';
 import agk from 'electron-updater';
-const { autoUpdater } = agk
+const { autoUpdater } = agk;
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -21,6 +22,123 @@ let db;
 
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
+
+
+// ==========================================
+// AUTO UPDATE EVENTS
+// ==========================================
+
+autoUpdater.on('update-available', (info) => {
+
+    dialog.showMessageBox({
+        type: 'info',
+        title: 'Gym Admin Update',
+        message: 'A new update is available.',
+        detail:
+            `Current version: ${app.getVersion()}\n` +
+            `New version: ${info.version}\n\n` +
+            `The update will download automatically.`
+    });
+
+});
+
+autoUpdater.on('download-progress', (progress) => {
+
+    dialog.showMessageBox({
+        type:'info',
+        title:'Gym Admin Update',
+        message:`Downloading update: ${progress.percent.toFixed(1)}%`
+    });
+
+});
+
+
+autoUpdater.on('update-downloaded', (info) => {
+
+
+    dialog.showMessageBox({
+        type: 'info',
+        title: 'Gym Admin Update',
+        message: 'Update downloaded successfully.',
+        detail:
+            `Version ${info.version} is ready to install.\n\n` +
+            `The update will be installed when you close Gym Admin.`
+    });
+
+});
+
+
+autoUpdater.on('error', (error) => {
+
+    console.error(
+        'AUTO UPDATE ERROR:',
+        error
+    );
+
+    dialog.showMessageBox({
+        type: 'error',
+        title: 'Gym Admin Update Error',
+        message: 'There was a problem checking for updates.',
+        detail: error.message || String(error)
+    });
+
+});
+
+
+// ==========================================
+// CHECK FOR UPDATES
+// ==========================================
+
+async function checkForUpdates() {
+
+    if (!app.isPackaged) {
+
+        console.log(
+            'Auto update disabled in development mode.'
+        );
+
+        return;
+
+    }
+
+
+    console.log(
+        '================================'
+    );
+
+    console.log(
+        'AUTO UPDATE'
+    );
+
+    console.log(
+        'Current version:',
+        app.getVersion()
+    );
+
+    console.log(
+        'Checking GitHub...'
+    );
+
+    console.log(
+        '================================'
+    );
+
+
+    try {
+
+        await autoUpdater.checkForUpdates();
+
+    } catch (error) {
+
+        console.error(
+            'Failed to check for updates:',
+            error
+        );
+
+    }
+
+}
+
 
 // ==========================================
 // CREATE WINDOW
@@ -49,6 +167,7 @@ function createWindow() {
             nodeIntegration: true,
             contextIsolation: false
         }
+
     });
 
 
@@ -77,7 +196,9 @@ function createWindow() {
                 );
 
                 mainWindow.center();
+
             }
+
         }
     );
 
@@ -87,6 +208,7 @@ function createWindow() {
         mainWindow = null;
 
     });
+
 }
 
 
@@ -99,8 +221,8 @@ app.whenReady().then(() => {
     console.log('==============================');
     console.log('Starting Gym Admin');
     console.log('Version:', app.getVersion());
+    console.log('Packaged:', app.isPackaged);
     console.log('==============================');
-
 
     // ======================================
     // DATABASE
@@ -145,6 +267,7 @@ app.whenReady().then(() => {
         app.quit();
 
         return;
+
     }
 
 
@@ -168,12 +291,15 @@ app.whenReady().then(() => {
         );
 
         if (db) {
+
             db.close();
+
         }
 
         app.quit();
 
         return;
+
     }
 
 
@@ -190,11 +316,14 @@ app.whenReady().then(() => {
                 'Server running at http://127.0.0.1:4500'
             );
 
+
             // Create Electron window
             createWindow();
 
+
             // Check GitHub for updates
-            autoUpdater.checkForUpdates();
+            checkForUpdates();
+
         }
     );
 
@@ -210,6 +339,7 @@ app.whenReady().then(() => {
             if (server) {
 
                 server = null;
+
             }
 
 
@@ -218,6 +348,7 @@ app.whenReady().then(() => {
                 db.close();
 
                 db = null;
+
             }
 
 
@@ -244,6 +375,7 @@ app.whenReady().then(() => {
                 server.close();
 
                 server = null;
+
             }
 
 
@@ -252,6 +384,7 @@ app.whenReady().then(() => {
                 db.close();
 
                 db = null;
+
             }
 
         }
