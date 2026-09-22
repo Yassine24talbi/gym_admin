@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog } from 'electron';
+import { app, BrowserWindow, dialog , net } from 'electron';
 import agk from 'electron-updater';
 const { autoUpdater } = agk;
 
@@ -22,6 +22,51 @@ let db;
 
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
+
+// ==========================================
+// CHECK INTERNET CONNECTION
+// ==========================================
+
+function checkInternetConnection() {
+
+    return new Promise((resolve) => {
+
+        const request = net.request(
+            'https://github.com'
+        );
+
+        request.on('response', (response) => {
+
+            console.log(
+                'Internet connection: ONLINE'
+            );
+
+            resolve(true);
+
+            request.abort();
+
+        });
+
+        request.on('error', (error) => {
+
+            console.log(
+                'Internet connection: OFFLINE'
+            );
+
+            console.log(
+                'Connection error:',
+                error.message
+            );
+
+            resolve(false);
+
+        });
+
+        request.end();
+
+    });
+
+}
 
 
 // ==========================================
@@ -116,16 +161,40 @@ async function checkForUpdates() {
 
     try {
 
-        await autoUpdater.checkForUpdates();
+    const online =
+        await checkInternetConnection();
 
-    } catch (error) {
 
-        console.error(
-            'Failed to check for updates:',
-            error
+    if (!online) {
+
+        console.log(
+            'No internet connection.'
         );
 
+        return;
+
     }
+
+
+    console.log(
+        'Internet available.'
+    );
+
+    console.log(
+        'Checking GitHub for updates...'
+    );
+
+
+    await autoUpdater.checkForUpdates();
+
+} catch (error) {
+
+    console.error(
+        'Failed to check for updates:',
+        error
+    );
+
+}
 
 }
 
