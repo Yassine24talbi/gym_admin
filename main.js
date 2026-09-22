@@ -42,16 +42,6 @@ autoUpdater.on('update-available', (info) => {
 
 });
 
-autoUpdater.on('download-progress', (progress) => {
-
-    dialog.showMessageBox({
-        type:'info',
-        title:'Gym Admin Update',
-        message:`Downloading update: ${progress.percent.toFixed(1)}%`
-    });
-
-});
-
 
 autoUpdater.on('update-downloaded', (info) => {
 
